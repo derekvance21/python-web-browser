@@ -85,7 +85,7 @@ def request(url: str, redirects: int = default_redirects):
     directives = [directive.strip() for directive in cachecontrol.split(",")]
     for directive in directives:
       if directive.startswith("max-age="):
-        seconds = int(directive.split("=")[1])
+        seconds = int(directive.split("=")[1].strip())
         if seconds > 0:
           cacheheader.pop("cache-control")
           cacheheader["content-length"] = len(body)
