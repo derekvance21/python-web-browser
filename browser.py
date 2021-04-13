@@ -3,7 +3,7 @@ import display
 
 def load(url : str) -> None:
   body = request.request(url)
-  display.display(body)
+  display.display(body, viewsource=url.startswith("view-source"))
 
 if __name__ == "__main__":
   import sys
