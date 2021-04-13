@@ -2,16 +2,16 @@ import uuid
 import csv
 import datetime
 
-cachepath = "cache/cache.csv"
+cachepath = "../cache/"
 fieldnames = ("url", "filename", "expiration")
 
 def getcache() -> list:
-  with open(cachepath, newline="") as f:
+  with open(f"{cachepath}cache.csv", newline="") as f:
     return [row for row in csv.DictReader(f)]
 
 
 def writecache(cache: list) -> None:
-  with open(cachepath, "w") as f:
+  with open(f"{cachepath}cache.csv", "w") as f:
     writer = csv.DictWriter(f, fieldnames)
     writer.writeheader()
     writer.writerows(cache)
@@ -30,7 +30,7 @@ def fetch(url: str):
     expiration = datetime.datetime.fromisoformat(match.get("expiration"))
     if datetime.datetime.now(tz=datetime.timezone.utc) < expiration:
       filename = match.get("filename")
-      f = open(f"cache/{filename}", "rb")
+      f = open(f"{cachepath}{filename}", "rb")
       return f
     else:
       # cache entry was outdated, so remove it and update cache csv
@@ -43,7 +43,7 @@ def cache(url: str, response: bytes, seconds: int) -> None:
   cache = getcache()
   match = getentry(url, cache)
   filename = match.get("filename") if match else uuid.uuid4()
-  with open(f"cache/{filename}", "wb") as f:
+  with open(f"{cachepath}{filename}", "wb") as f:
     f.write(response)
   expiration = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=seconds)
   cache.append({"url": url, "filename": filename, "expiration": expiration})
