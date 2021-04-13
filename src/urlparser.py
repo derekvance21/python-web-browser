@@ -11,7 +11,7 @@ def parse(url):
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: urlparser.py <url>"
+  assert len(sys.argv) == 2, "Usage: python3 urlparser.py <url>"
   url = sys.argv[1]
   scheme, host, port, path = parse(url)
   print(f"scheme: {scheme}")

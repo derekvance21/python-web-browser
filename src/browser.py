@@ -7,5 +7,5 @@ def load(url : str) -> None:
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: browser.py <url>"
+  assert len(sys.argv) == 2, "Usage: python3 browser.py <url>"
   load(sys.argv[1])

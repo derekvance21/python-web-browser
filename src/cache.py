@@ -53,7 +53,7 @@ def cache(url: str, response: bytes, seconds: int) -> None:
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, f"Usage: cache.py <url>"
+  assert len(sys.argv) == 2, f"Usage: python3 cache.py <url>"
   url = sys.argv[1]
   entry = getentry(url)
   print(entry)

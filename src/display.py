@@ -48,7 +48,7 @@ def display(html, viewsource=False):
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: display.py <htmlfile>"
+  assert len(sys.argv) == 2, "Usage: python3 display.py <htmlfile>"
   htmlfile = sys.argv[1]
   with open(htmlfile, 'r') as f:
     html = f.read()

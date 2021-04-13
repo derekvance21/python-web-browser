@@ -116,7 +116,7 @@ def request(url: str, redirects: int = default_redirects):
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: request.py <url>"
+  assert len(sys.argv) == 2, "Usage: python3 request.py <url>"
   url = sys.argv[1]
   body = request(url)
   print(f"body:\n{body}")
