@@ -28,12 +28,16 @@ def fetch(url: str):
   match = getentry(url, cache)
   if match:
     expiration = datetime.datetime.fromisoformat(match.get("expiration"))
+    filename = match.get("filename")
+    responsepath = f"{cachepath}{filename}"
     if datetime.datetime.now(tz=datetime.timezone.utc) < expiration:
-      filename = match.get("filename")
-      f = open(f"{cachepath}{filename}", "rb")
+      f = open(responsepath, "rb")
       return f
     else:
       # cache entry was outdated, so remove it and update cache csv
+      import os
+      if os.path.exists(responsepath):
+        os.remove(responsepath)
       cache.pop(match)
       writecache(cache)
   return None
