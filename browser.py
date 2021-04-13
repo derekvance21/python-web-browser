@@ -1,8 +1,8 @@
 import request
 import display
 
-def load(url):
-  headers, body = request.request(url)
+def load(url : str) -> None:
+  body = request.request(url)
   display.display(body)
 
 if __name__ == "__main__":

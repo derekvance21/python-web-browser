@@ -1,15 +1,24 @@
 def display(html):
-  in_tag = False
+  intag = False
+  inbody = False
+  tag = ""
   for c in html:
     if c == "<":
-      in_tag = True
+      tag = ""
+      intag = True
     elif c == ">":
-      in_tag = False
-    elif not in_tag:
+      inbody = False if tag.lower().startswith("/body") else inbody or tag.lower().startswith("body")
+      intag = False
+    elif intag:
+      tag += c
+    elif not intag and inbody:
       print(c, end="")
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: display.py <html>"
-  html = sys.argv[1]
-  display(html)
+  assert len(sys.argv) == 2, "Usage: display.py <htmlfile>"
+  htmlfile = sys.argv[1]
+  with open(htmlfile, 'r') as f:
+    html = f.read()
+    display(html)
+  f.close()
