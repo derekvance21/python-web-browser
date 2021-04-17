@@ -20,7 +20,7 @@ def transform(html):
 def lex(html, viewsource=False):
   html = transform(html) if viewsource else html
   intag = False
-  inbody = False
+  inhead = False
   inentity = False
   entity = ""
   tag = ""
@@ -30,7 +30,10 @@ def lex(html, viewsource=False):
       tag = ""
       intag = True
     elif c == ">":
-      inbody = False if tag.lower().startswith("/body") else inbody or tag.lower().startswith("body")
+      if tag.lower().startswith("/head"):
+        inhead = False 
+      elif tag.lower().startswith("head"):
+        inhead = True
       intag = False
     elif c == "&":
       entity = ""
@@ -44,7 +47,7 @@ def lex(html, viewsource=False):
         entity += c
     elif intag:
       tag += c
-    elif inbody or viewsource:
+    elif not inhead or viewsource:
       text += c
   return text
 
