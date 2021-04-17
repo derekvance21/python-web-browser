@@ -11,6 +11,7 @@ Run `python3 src/browser.py <url>` from the command line, where `<url>` is a com
 The browser supports the following features:
 
 - HTTP and HTTPS protocols
+- Data URI scheme (i.e. `data:text/html,<body><h1>Hello</h1></body>`)
 - Transfer-Encoding: chunked
 - Content-Encoding: gzip
 - Cache-Control: max-age=`<seconds>`
