@@ -17,13 +17,14 @@ def transform(html):
   return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def display(html, viewsource=False):
+def lex(html, viewsource=False):
   html = transform(html) if viewsource else html
   intag = False
   inbody = False
   inentity = False
   entity = ""
   tag = ""
+  text = ""
   for c in html:
     if c == "<":
       tag = ""
@@ -38,19 +39,21 @@ def display(html, viewsource=False):
       if c == ";":
         inentity = False
         translation = entitytable.get(entity)
-        print(translation, end="")
-      else: 
+        text += translation or c
+      else:
         entity += c
     elif intag:
       tag += c
     elif inbody or viewsource:
-      print(c, end="")
+      text += c
+  return text
+
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: python3 display.py <htmlfile>"
+  assert len(sys.argv) == 2, "Usage: python3 parse.py <htmlfile>"
   htmlfile = sys.argv[1]
   with open(htmlfile, 'r') as f:
     html = f.read()
-    display(html, True)
+    print(lex(html))
   f.close()

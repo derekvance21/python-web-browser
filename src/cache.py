@@ -1,20 +1,27 @@
 import uuid
 import csv
 import datetime
+import os
 
-cachepath = "../cache/"
+cachedir = "../cache/"
 fieldnames = ("url", "filename", "expiration")
+cachepath = f"{cachedir}cache.csv"
 
 def getcache() -> list:
-  with open(f"{cachepath}cache.csv", newline="") as f:
-    return [row for row in csv.DictReader(f)]
+  if os.path.isfile(cachepath):
+    with open(cachepath, newline="") as f:
+      reader = csv.DictReader(f)
+      return [row for row in reader]
+  else:
+    return writecache([])
+    
 
-
-def writecache(cache: list) -> None:
-  with open(f"{cachepath}cache.csv", "w") as f:
+def writecache(cache: list) -> list:
+  with open(cachepath, "w") as f:
     writer = csv.DictWriter(f, fieldnames)
     writer.writeheader()
     writer.writerows(cache)
+  return cache
 
 
 def getentry(url: str, cache: list = None) -> dict:
@@ -29,7 +36,7 @@ def fetch(url: str):
   if match:
     expiration = datetime.datetime.fromisoformat(match.get("expiration"))
     filename = match.get("filename")
-    responsepath = f"{cachepath}{filename}"
+    responsepath = f"{cachedir}{filename}"
     if datetime.datetime.now(tz=datetime.timezone.utc) < expiration:
       f = open(responsepath, "rb")
       return f
@@ -38,7 +45,7 @@ def fetch(url: str):
       import os
       if os.path.exists(responsepath):
         os.remove(responsepath)
-      cache.pop(match)
+      cache.remove(match)
       writecache(cache)
   return None
     
@@ -47,7 +54,7 @@ def cache(url: str, response: bytes, seconds: int) -> None:
   cache = getcache()
   match = getentry(url, cache)
   filename = match.get("filename") if match else uuid.uuid4()
-  with open(f"{cachepath}{filename}", "wb") as f:
+  with open(f"{cachedir}{filename}", "wb") as f:
     f.write(response)
   expiration = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=seconds)
   cache.append({"url": url, "filename": filename, "expiration": expiration})

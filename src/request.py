@@ -1,4 +1,3 @@
-import urlparser
 import socket
 import cache
 
@@ -11,7 +10,21 @@ def httpheader(header: dict) -> str:
 def request(url: str, redirects: int = default_redirects):
   assert redirects >= 0, f"Error: request exceeded {default_redirects} redirects"
 
-  scheme, host, port, path = urlparser.parse(url)
+  scheme, resource = url.split(":", 1)
+  assert scheme in ["http", "https", "data"], f"Unknown scheme {scheme}"
+  if scheme == "data":
+    mediatype, data = resource.split(",")
+    header = {"content-type": mediatype}
+    return header, data
+
+  assert resource.startswith("//"), "Format: http or https scheme not followed by '//'"
+  resource = resource[2:]
+  host, path = resource.split("/", 1)
+  path = "/" + path
+  port = 80 if scheme == "http" else 443
+  if ":" in host:
+    host, port = host.split(":", 1)
+    port = int(port)
 
   response = cache.fetch(url)
   if not response:
@@ -110,7 +123,7 @@ def request(url: str, redirects: int = default_redirects):
       redirect = f"{scheme}://{redirect}"
     return request(redirect, redirects=redirects-1)
 
-  return body
+  return header, body
 
 
 
@@ -118,5 +131,5 @@ if __name__ == "__main__":
   import sys
   assert len(sys.argv) == 2, "Usage: python3 request.py <url>"
   url = sys.argv[1]
-  body = request(url)
+  header, body = request(url)
   print(f"body:\n{body}")
