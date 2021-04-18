@@ -13,43 +13,49 @@ entitytable = {
   "reg": '®'
 }
 
+class Text:
+  def __init__(self, text):
+    self.text = text
+
+class Tag:
+  def __init__(self, tag):
+    self.tag = tag
+
+
 def transform(html):
   return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def lex(html, viewsource=False):
   html = transform(html) if viewsource else html
+  out = []
   intag = False
-  inhead = False
   inentity = False
   entity = ""
-  tag = ""
   text = ""
   for c in html:
     if c == "<":
-      tag = ""
       intag = True
+      if text: out.append(Text(text))
+      text = ""
     elif c == ">":
-      if tag.lower().startswith("/head"):
-        inhead = False 
-      elif tag.lower().startswith("head"):
-        inhead = True
       intag = False
+      out.append(Tag(text))
+      text = ""
     elif c == "&":
       entity = ""
       inentity = True
     elif inentity:
       if c == ";":
+        text += entitytable.get(entity) or entity
         inentity = False
-        translation = entitytable.get(entity)
-        text += translation or c
       else:
         entity += c
-    elif intag:
-      tag += c
-    elif not inhead or viewsource:
+    else:
       text += c
-  return text
+  if not intag and text:
+    out.append(Text(text))
+  return out
 
 
 if __name__ == "__main__":

@@ -1,10 +1,9 @@
 import tkinter as tk
+import tkinter.font
 import request
 import parse
-
-FONT_SIZE = 8
-SCROLL_STEP = 100
-WIDTH, HEIGHT = 800, 600
+from layout import Layout
+from constants import WIDTH, HEIGHT, SCROLL_STEP, FONT_SIZE, MARGIN
 
 class Browser:
   
@@ -20,65 +19,48 @@ class Browser:
     self.canvas.pack(expand=1, fill="both")
     self.scroll = 0
     self.width, self.height = WIDTH, HEIGHT
-    self.fontsize, self.vstep = FONT_SIZE, FONT_SIZE * 1.5
+    self.fontsize = FONT_SIZE
 
   def zoomin(self, e):
-    self.fontsize += 1
-    self.vstep = self.fontsize * 1.5
-    self.layout()
-    self.render()
+    self.fontsize = int(self.fontsize * 1.25)
+    self.update()
 
   def zoomout(self, e):
-    self.fontsize = max(2, self.fontsize - 1)
-    self.vstep = self.fontsize * 1.5
-    self.layout()
-    self.render()
+    self.fontsize = max(4, int(self.fontsize * 0.8))
+    self.update()
 
   def resize(self, e):
     self.width, self.height = e.width, e.height
-    self.layout()
-    self.render()
+    self.update()
 
   def scrolldown(self, e):
     self.scroll += SCROLL_STEP
-    self.render()
+    self.update(layout=False)
 
   def scrollup(self, e):
     self.scroll = max(0, self.scroll - SCROLL_STEP)
-    self.render()
+    self.update(layout=False)
 
   def scrollwheel(self, e):
     self.scroll = max(0, self.scroll - e.delta)
-    self.render()
-
-  def layout(self):
-    displaylist = []
-    cursor_x, cursor_y = self.fontsize, self.vstep
-    for c in self.text:
-      if c == "\n":
-        cursor_x = self.fontsize
-        cursor_y += self.vstep * 2
-      else:
-        cursor_x += self.fontsize
-        if cursor_x >= self.width - self.fontsize:
-          cursor_x = self.fontsize
-          cursor_y += self.vstep
-        displaylist.append((cursor_x, cursor_y, c))
-    self.displaylist = displaylist
+    self.update(layout=False)
     
   def render(self):
     self.canvas.delete("all")
-    for x, y, c in self.displaylist:
+    for x, y, word, font in self.displaylist:
       if y > self.scroll + self.height: continue
-      if y + self.vstep < self.scroll: continue
-      if ord(c) in range(65536):
-        self.canvas.create_text(x, y - self.scroll, text=c, font=("", self.fontsize))
+      if y + MARGIN < self.scroll: continue
+      self.canvas.create_text(x, y - self.scroll, text=word, anchor='nw', font=font)
+
+  def update(self, layout=True):
+    if layout:
+      self.displaylist = Layout(self, self.tokens).displaylist
+    self.render()
 
   def load(self, url):
     header, body = request.request(url)
-    self.text = parse.lex(body) if header.get("content-type").startswith("text/html") else body
-    self.layout()
-    self.render()
+    self.tokens = parse.lex(body) if header.get("content-type").startswith("text/html") else body
+    self.update()
 
 
 if __name__ == "__main__":
