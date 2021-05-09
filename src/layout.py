@@ -1,40 +1,40 @@
-import parse
+from parse import Text
 import tkinter.font
 from constants import MARGIN, FONT_FAMILY
 
 class Layout:
-  def __init__(self, browser, tokens):
+  def __init__(self, browser, tree):
     self.displaylist = [] 
     self.line = []
     self.cursor_x, self.cursor_y = MARGIN, MARGIN
     self.fontsize = browser.fontsize
     self.width = browser.width
     self.weight, self.style = "normal", "roman"
-    for token in tokens:
-      self.token(token)
+    self.recurse(tree)
     self.flush()
 
-  def token(self, token):
-    if isinstance(token, parse.Text): self.text(token.text)
-    elif token.tag == "i":
+  def open_tag(self, tag):
+    if tag == "i":
       self.style = "italic"
-    elif token.tag == "/i":
-      self.style = "roman"
-    elif token.tag == "b":
+    elif tag == "b":
       self.weight = "bold"
-    elif token.tag == "/b":
-      self.weight = "normal"
-    elif token.tag == "small":
+    elif tag == "small":
       self.fontsize -= 2
-    elif token.tag == "/small":
-      self.fontsize += 2
-    elif token.tag == "big":
+    elif tag == "big":
       self.fontsize += 4
-    elif token.tag == "/big":
+
+  def close_tag(self, tag):
+    if tag == "i":
+      self.style = "roman"
+    elif tag == "b":
+      self.weight = "normal"
+    elif tag == "small":
+      self.fontsize += 2
+    elif tag == "big":
       self.fontsize -= 4
-    elif token.tag == "br":
+    elif tag == "br":
       self.flush()
-    elif token.tag == "/p" or token.tag.startswith("/h"):
+    elif tag == "p" or tag.startswith("h"):
       self.flush()
       self.cursor_y += MARGIN
 
@@ -47,6 +47,16 @@ class Layout:
         self.flush()
       self.line.append((self.cursor_x, word, font))
       self.cursor_x += w + font.measure(" ")
+
+  def recurse(self, tree):
+    if isinstance(tree, Text): self.text(tree.text)
+    elif tree.tag in ["script", "style"]: return
+    else:
+      self.open_tag(tree.tag)
+      for child in tree.children:
+        self.recurse(child)
+      self.close_tag(tree.tag)
+
 
   def flush(self):
     if not self.line: return

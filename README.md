@@ -20,8 +20,10 @@ The browser supports the following features:
 - Zooming in/out, using Ctrl+plus/minus
 - Window resizing
 - `<b>`, `<i>`, `<big>`, `<small>`, `<p>`, and `<br>` tags
+- Rudimentary HTML parsing
 
 ## Bug Report
 
-| Date Reported | Date Fixed | Summary | Steps to Reproduce |
-| ------------- | ---------- | ------- | ------------------ |
+| Date Reported | Date Fixed | Summary                                        | Steps to Reproduce                          |
+| ------------- | ---------- | ---------------------------------------------- | ------------------------------------------- |
+| 4/23/21       |            | path used in cache.py for windows backslashing | run caching on windows, and make sure works |

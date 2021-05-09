@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.font
 import request
-import parse
+from parse import HTMLParser
 from layout import Layout
 from constants import WIDTH, HEIGHT, SCROLL_STEP, FONT_SIZE, MARGIN
 
@@ -54,18 +54,19 @@ class Browser:
 
   def update(self, layout=True):
     if layout:
-      self.displaylist = Layout(self, self.tokens).displaylist
+      self.displaylist = Layout(self, self.tree).displaylist
     self.render()
 
   def load(self, url):
     header, body = request.request(url)
-    self.tokens = parse.lex(body) if header.get("content-type").startswith("text/html") else body
+    self.tree = HTMLParser(body).parse()
+    self.displaylist = Layout(self, self.tree).displaylist
     self.update()
 
 
 if __name__ == "__main__":
   import sys
-  assert len(sys.argv) == 2, "Usage: src/window.py <url>"
+  assert len(sys.argv) == 2, "Usage: src/browser.py <url>"
   url = sys.argv[1]
   Browser().load(url)
   tk.mainloop()

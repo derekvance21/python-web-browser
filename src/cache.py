@@ -3,9 +3,9 @@ import csv
 import datetime
 import os
 
-cachedir = "../cache/"
+cachedir = os.path.join(os.path.dirname(__file__), "../cache/")
 fieldnames = ("url", "filename", "expiration")
-cachepath = f"{cachedir}cache.csv"
+cachepath = os.path.join(cachedir, "cache.csv")
 
 def getcache() -> list:
   if os.path.isfile(cachepath):
@@ -34,15 +34,14 @@ def fetch(url: str):
   cache = getcache()
   match = getentry(url, cache)
   if match:
-    expiration = datetime.datetime.fromisoformat(match.get("expiration"))
+    expiration = datetime.datetime.fromisoformat(match.get("expiration") or datetime.datetime.min)
     filename = match.get("filename")
-    responsepath = f"{cachedir}{filename}"
+    responsepath = os.path.join(cachedir, filename)
     if datetime.datetime.now(tz=datetime.timezone.utc) < expiration:
       f = open(responsepath, "rb")
       return f
     else:
       # cache entry was outdated, so remove it and update cache csv
-      import os
       if os.path.exists(responsepath):
         os.remove(responsepath)
       cache.remove(match)
